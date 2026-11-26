@@ -2,12 +2,14 @@
 // Prerequisite: backend running and serving the built frontend:
 //   (cd frontend && npm run build) && (cd backend && uvicorn app.main:app --port 8000)
 // Run:  node e2e/journey.mjs [baseUrl] [screenshotDir]
-import { chromium, devices } from 'playwright'
+import { createRequire } from 'node:module'
 import { mkdirSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
+// Playwright may be installed globally or locally (npm i -D playwright); require() finds either.
+const { chromium, devices } = createRequire(import.meta.url)('playwright')
 const BASE = process.argv[2] || 'http://127.0.0.1:8000'
 const SHOTS = process.argv[3] || path.join(here, '..', 'test-results')
 const IMAGES = path.join(here, '..', '..', 'backend', 'tests', 'images')
@@ -67,8 +69,9 @@ await page.screenshot({ path: `${SHOTS}/03-result-ta.png`, fullPage: true })
 
 // Switch to English on the same report
 await page.locator('.topbar').getByRole('button', { name: 'English' }).click()
-await page.getByText('Late blight').first().waitFor()
-check('Same report re-rendered in English', await page.getByRole('heading', { name: 'Late blight' }).isVisible())
+const enHeading = page.getByRole('heading', { name: 'Late blight' })
+await enHeading.waitFor({ timeout: 15000 }).catch(() => {})
+check('Same report re-rendered in English', await enHeading.isVisible())
 await page.screenshot({ path: `${SHOTS}/04-result-en.png`, fullPage: true })
 
 // Unsupported photo (tulip) -> no disease

@@ -101,7 +101,8 @@ export function Alert({ kind = 'info', title, children }) {
 }
 
 export function ConfidenceBar({ value }) {
-  const pct = Math.round(value * 100)
+  // Never display 100%: a model estimate is never certain.
+  const pct = Math.min(99, Math.round(value * 100))
   const level = value >= 0.9 ? 'high' : value >= 0.7 ? 'mid' : 'low'
   return (
     <div className="conf">

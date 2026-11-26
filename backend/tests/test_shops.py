@@ -17,6 +17,7 @@ def test_invalid_coordinates(client):
 def test_unreachable_service_reports_error_not_fake_data(client, monkeypatch):
     from app import config
     monkeypatch.setattr(config, "OVERPASS_URLS", ["https://127.0.0.1:9/api/interpreter"])
+    monkeypatch.setattr(config, "NOMINATIM_URL", "https://127.0.0.1:9")  # fallback also down
     shops._cache.clear()
     r = client.get("/api/shops?lat=10.78&lon=79.13&radius=5000")
     assert r.status_code == 503 and r.json()["detail"] == "shop_service_unavailable"

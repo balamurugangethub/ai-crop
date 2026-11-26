@@ -21,7 +21,7 @@ export default function ReportPage() {
   if (err) return <div className="page"><Alert kind="error">{err}</Alert></div>
   if (!r) return <div className="page"><Spinner /></div>
   const d = r.disease
-  const summary = d ? `${d.crop_name}. ${d.name}. ${t('confidence')} ${Math.round(r.confidence * 100)}%. ${d.severity_note}` : ''
+  const summary = d ? `${d.crop_name}. ${d.name}. ${t('confidence')} ${Math.min(99, Math.round(r.confidence * 100))}%. ${d.severity_note}` : ''
 
   return (
     <div className="page report">
