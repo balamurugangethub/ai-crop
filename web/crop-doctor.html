@@ -1,0 +1,690 @@
+<title>AI Crop Doctor</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&display=swap">
+<style>
+/* Layout: one-column phone app; sticky green header, big touch targets, cards only for separable objects */
+:root {
+  --leaf: #3f8f3a; --leaf-ink: #ffffff; --forest: #1f4d2b; --earth: #7a4e2d; --earth-soft: #a9774b;
+  --bg: #fbf6e9; --card: #fffdf6; --ink: #2a2a22; --muted: #6a6656; --line: #e4dcc4; --yellow: #f6e7a6;
+  --warn-bg: #fff4d6; --warn-ink: #6e4b00; --warn-line: #f0d48a;
+  --err-bg: #fde8e4; --err-ink: #8a1f11; --err-line: #f2b8ad;
+  --ok-bg: #e8f3e4; --ok-ink: #1f4d2b; --ok-line: #bcdcb2;
+  --sev-high: #c0392b; --sev-mid: #d39b17;
+  --sky-top: #f9e7b0; --sky-bottom: #fdf5dc; --sun: #f2b84b; --hill: #9fbf7a; --tree: #2f5d2a;
+  --wall: #e9d3ae; --roof: #8a4b28; --door: #5c3a22; --field-1: #7fb24f; --field-2: #5e9a3a; --field-3: #3f7d2b; --row: #d8e8a8;
+  --hero-ink: #1f3b17; --hero-sub: #3b3a2a;
+  --header: #1f4d2b; --header-ink: #ffffff;
+  --font: 'Mukta', 'Noto Sans Tamil', system-ui, sans-serif;
+  --font-ta: 'Noto Sans Tamil', 'Mukta', system-ui, sans-serif;
+  --r: 16px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --leaf: #6dbb5f; --leaf-ink: #0e1a0b; --forest: #b7e3a8; --earth: #d4a274; --earth-soft: #b68757;
+  --bg: #141a12; --card: #1d251a; --ink: #ecebdf; --muted: #a8a690; --line: #33402c; --yellow: #4a421c;
+  --warn-bg: #3a2f10; --warn-ink: #f6d98a; --warn-line: #6b5520; --err-bg: #3d1a14; --err-ink: #f7b6a9; --err-line: #6e2d22;
+  --ok-bg: #1c3320; --ok-ink: #c5e8bb; --ok-line: #2f5434; --sev-high: #ef7b6c; --sev-mid: #e8c15a;
+  --sky-top: #24304a; --sky-bottom: #3a3f45; --sun: #e9d9a0; --hill: #3e5a33; --tree: #1a2c17;
+  --wall: #8f7c5e; --roof: #5d3420; --door: #2d1d12; --field-1: #3f6a2a; --field-2: #335a22; --field-3: #284a1a; --row: #6c8a4c;
+  --hero-ink: #f3ecd2; --hero-sub: #e2dcc4; --header: #0f1a0d; --header-ink: #ecebdf; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --leaf: #6dbb5f; --leaf-ink: #0e1a0b; --forest: #b7e3a8; --earth: #d4a274; --earth-soft: #b68757;
+  --bg: #141a12; --card: #1d251a; --ink: #ecebdf; --muted: #a8a690; --line: #33402c; --yellow: #4a421c;
+  --warn-bg: #3a2f10; --warn-ink: #f6d98a; --warn-line: #6b5520; --err-bg: #3d1a14; --err-ink: #f7b6a9; --err-line: #6e2d22;
+  --ok-bg: #1c3320; --ok-ink: #c5e8bb; --ok-line: #2f5434; --sev-high: #ef7b6c; --sev-mid: #e8c15a;
+  --sky-top: #24304a; --sky-bottom: #3a3f45; --sun: #e9d9a0; --hill: #3e5a33; --tree: #1a2c17;
+  --wall: #8f7c5e; --roof: #5d3420; --door: #2d1d12; --field-1: #3f6a2a; --field-2: #335a22; --field-3: #284a1a; --row: #6c8a4c;
+  --hero-ink: #f3ecd2; --hero-sub: #e2dcc4; --header: #0f1a0d; --header-ink: #ecebdf; color-scheme: dark }
+
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.5 var(--font); -webkit-text-size-adjust: 100%; }
+html:lang(ta) body { font-family: var(--font-ta); }
+h1, h2, h3 { color: var(--forest); line-height: 1.2; margin: 0 0 .4em; text-wrap: balance; }
+h1 { font-size: 1.55rem; } h2 { font-size: 1.3rem; } h3 { font-size: 1.08rem; }
+p { margin: 0 0 .6em; } a { color: var(--leaf); }
+.muted { color: var(--muted); } .small { font-size: .88rem; }
+button, input { font: inherit; }
+:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--header); }
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--header); color: var(--header-ink);
+  display: flex; align-items: center; gap: 10px; padding-block: 10px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.brand { display: flex; align-items: center; gap: 8px; color: inherit; text-decoration: none; font-weight: 700; font-size: 1.08rem; flex: 1; min-width: 0; }
+.brand svg { flex: none; }
+.lang { display: inline-flex; border: 2px solid color-mix(in srgb, var(--header-ink) 35%, transparent); border-radius: 999px; overflow: hidden; flex: none; }
+.lang button { border: 0; background: transparent; color: var(--header-ink); padding: 6px 12px; font-weight: 700; cursor: pointer; min-height: 40px; }
+.lang button[aria-pressed="true"] { background: var(--header-ink); color: var(--header); }
+
+main { max-width: 640px; margin: 0 auto; padding-block: 16px 104px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 14px; }
+.view { display: flex; flex-direction: column; gap: 14px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 10px 18px;
+  border-radius: 12px; border: 2px solid transparent; font-weight: 700; cursor: pointer; text-decoration: none; text-align: center; }
+.btn[disabled] { opacity: .55; cursor: not-allowed; }
+.primary { background: var(--leaf); color: var(--leaf-ink); }
+.secondary { background: transparent; color: var(--earth); border-color: var(--earth-soft); }
+.ghost { background: transparent; color: var(--muted); border-color: var(--line); min-height: 42px; }
+.block { width: 100%; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; } .row > .btn { flex: 1 1 160px; }
+
+.hero { position: relative; border-radius: var(--r); overflow: hidden; min-height: 200px; }
+.hero svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.hero-text { position: relative; padding: 18px; }
+.hero-text h1 { color: var(--hero-ink); font-size: 1.8rem; margin: 0 0 4px; }
+.hero-text p { color: var(--hero-sub); font-weight: 600; max-width: 30ch; }
+
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tile { display: flex; flex-direction: column; gap: 2px; padding: 14px; border-radius: var(--r); background: var(--card); border: 1px solid var(--line);
+  color: var(--ink); text-decoration: none; min-height: 112px; cursor: pointer; text-align: left; }
+.tile b { color: var(--forest); font-size: 1.04rem; }
+.tile span { color: var(--muted); font-size: .86rem; }
+.tile.main { grid-column: 1 / -1; background: var(--leaf); border-color: var(--leaf); min-height: 96px; }
+.tile.main b, .tile.main span { color: var(--leaf-ink); } .tile.main b { font-size: 1.25rem; }
+.tile .ico { width: 30px; height: 30px; margin-bottom: 6px; }
+.tile.main .ico { color: var(--leaf-ink); } .tile .ico { color: var(--leaf); }
+
+.note { background: color-mix(in srgb, var(--yellow) 70%, transparent); border-radius: 12px; padding: 10px 14px; font-size: .94rem; }
+.alert { border: 1px solid; border-radius: 12px; padding: 12px 14px; font-size: .95rem; }
+.alert b { display: block; }
+.a-warn { background: var(--warn-bg); color: var(--warn-ink); border-color: var(--warn-line); }
+.a-err { background: var(--err-bg); color: var(--err-ink); border-color: var(--err-line); }
+.a-ok { background: var(--ok-bg); color: var(--ok-ink); border-color: var(--ok-line); }
+
+.drop { border: 3px dashed var(--line); border-radius: var(--r); padding: 22px 16px; text-align: center; color: var(--muted); }
+.preview { display: block; width: 100%; max-height: 340px; object-fit: contain; border-radius: 12px; background: var(--bg); }
+.progress { display: flex; align-items: center; gap: 12px; font-weight: 600; color: var(--forest); padding: 8px 0; }
+.spin { width: 28px; height: 28px; border-radius: 50%; border: 4px solid var(--line); border-top-color: var(--leaf); animation: s .9s linear infinite; flex: none; }
+@keyframes s { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spin { animation-duration: 3s; } }
+
+.res-top { display: grid; grid-template-columns: 110px 1fr; gap: 14px; align-items: start; }
+.res-top img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; }
+.pill { display: inline-block; font-weight: 700; font-size: .86rem; padding: 3px 12px; border-radius: 999px; margin-bottom: 6px; }
+.p-ok { background: var(--ok-bg); color: var(--ok-ink); } .p-warn { background: var(--warn-bg); color: var(--warn-ink); }
+.dname { font-size: 1.45rem; margin: 2px 0; }
+.conf { display: flex; align-items: center; gap: 10px; }
+.track { flex: 1; height: 12px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.fill { height: 100%; border-radius: 999px; background: var(--leaf); }
+.fill.mid { background: var(--sev-mid); } .fill.low { background: var(--sev-high); }
+.conf b { min-width: 3.2em; text-align: right; font-variant-numeric: tabular-nums; }
+.sev { border-left: 6px solid var(--line); background: var(--bg); border-radius: 12px; padding: 12px 14px; }
+.sev.high { border-left-color: var(--sev-high); } .sev.moderate { border-left-color: var(--sev-mid); }
+.sec h3 { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.sec ul { margin: 0; padding-left: 1.2em; } .sec li { margin-bottom: 6px; }
+.speak { border: 1px solid var(--line); background: transparent; color: var(--muted); border-radius: 999px; padding: 4px 12px; font-size: .86rem; font-weight: 600; cursor: pointer; min-height: 34px; }
+.cands { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.src li { word-break: break-word; }
+
+.hist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.hist li { display: flex; align-items: center; gap: 12px; }
+.hist .open { display: flex; gap: 12px; align-items: center; flex: 1; min-width: 0; background: none; border: 0; padding: 0; text-align: left; color: var(--ink); cursor: pointer; }
+.hist img { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; flex: none; background: var(--line); }
+
+label.fld { display: flex; flex-direction: column; gap: 4px; font-weight: 600; }
+input[type=text] { min-height: 52px; border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--bg); color: var(--ink); width: 100%; }
+.tips { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.tips li { display: flex; gap: 12px; align-items: flex-start; }
+.tips .n { flex: none; width: 32px; height: 32px; border-radius: 50%; background: var(--leaf); color: var(--leaf-ink); display: grid; place-items: center; font-weight: 700; }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stats div { background: var(--bg); border-radius: 12px; padding: 10px 12px; }
+.stats b { display: block; font-size: 1.35rem; color: var(--forest); font-variant-numeric: tabular-nums; }
+
+.nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; display: grid; grid-template-columns: repeat(5, 1fr);
+  background: var(--card); border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
+.nav a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 60px; color: var(--muted); text-decoration: none; font-size: .74rem; font-weight: 600; text-align: center; padding: 4px 2px; }
+.nav a svg { width: 24px; height: 24px; }
+.nav a[aria-current="page"] { color: var(--leaf); }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-leaf" viewBox="0 0 24 24"><path fill="currentColor" d="M20 3C10 3 4 8 4 15c0 2 .6 3.6 1.5 5l1.4-1.4C9 14 13 11 17 9c-3.5 2.5-6.6 5.7-8.6 9.7 1 .2 2 .3 3 .3 7 0 9.6-6 8.6-16z"/></symbol>
+    <symbol id="i-cam" viewBox="0 0 24 24"><path fill="currentColor" d="M9 4 7.2 6H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3.2L15 4H9zm3 4.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9zm0 2a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3 2 11h3v9h5v-6h4v6h5v-9h3z"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path fill="currentColor" d="M4 5h2v2H4zm4 0h12v2H8zM4 11h2v2H4zm4 0h12v2H8zm-4 6h2v2H4zm4 0h12v2H8z"/></symbol>
+    <symbol id="i-shop" viewBox="0 0 24 24"><path fill="currentColor" d="M4 4h16l1.5 5a3 3 0 0 1-5 2.2 3 3 0 0 1-4.5 0 3 3 0 0 1-4.5 0A3 3 0 0 1 2.5 9zM4 13.5V20h6v-4h4v4h6v-6.5a4.8 4.8 0 0 1-3.5-.6 4.9 4.9 0 0 1-4.5.4 4.9 4.9 0 0 1-4.5-.4 4.8 4.8 0 0 1-3.5.6z"/></symbol>
+    <symbol id="i-sprout" viewBox="0 0 24 24"><path fill="currentColor" d="M11 21v-6.2C7.2 14.4 4 11.6 4 7V5h2c3.3 0 6 1.9 7 4.6C14 6.9 16.7 5 20 5h2v2c0 4.6-3.2 7.4-7 7.8V21z"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-6h2zm0-8h-2V7h2z"/></symbol>
+  </defs>
+</svg>
+
+<header class="top">
+  <a class="brand" href="#home"><svg width="26" height="26" style="color:var(--header-ink)"><use href="#i-leaf"/></svg><span data-t="appName"></span></a>
+  <div class="lang" role="group" aria-label="Language">
+    <button type="button" data-lang="en" id="lang-en">English</button><button type="button" data-lang="ta" id="lang-ta">தமிழ்</button>
+  </div>
+</header>
+
+<main>
+  <!-- HOME -->
+  <section class="view" data-view="home">
+    <div class="hero">
+      <svg viewBox="0 0 800 260" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+        <defs><linearGradient id="sky" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--sky-top)"/><stop offset="1" stop-color="var(--sky-bottom)"/></linearGradient></defs>
+        <rect width="800" height="260" fill="url(#sky)"/>
+        <circle cx="660" cy="70" r="34" fill="var(--sun)"/>
+        <path d="M0 150 Q120 95 250 140 T520 130 T800 120 V260 H0Z" fill="var(--hill)"/>
+        <g fill="var(--tree)"><rect x="716" y="100" width="5" height="52" rx="2"/><path d="M718 100 q-26 -4 -38 12 q20 -8 38 -6 q-14 -16 -4 -28 q6 16 6 22 q8 -18 26 -18 q-12 10 -22 24 q22 -4 34 6 q-20 -6 -40 -12z"/></g>
+        <rect x="560" y="122" width="56" height="34" fill="var(--wall)"/><path d="M552 126 L588 98 L624 126Z" fill="var(--roof)"/><rect x="582" y="136" width="12" height="20" fill="var(--door)"/>
+        <rect x="628" y="130" width="40" height="26" fill="var(--wall)"/><path d="M622 133 L648 112 L674 133Z" fill="var(--roof)"/>
+        <path d="M0 170 Q400 140 800 165 V260 H0Z" fill="var(--field-1)"/>
+        <path d="M0 200 Q400 172 800 196 V260 H0Z" fill="var(--field-2)"/>
+        <g stroke="var(--row)" stroke-width="3" stroke-linecap="round" opacity=".55" fill="none">
+          <path d="M-20 260 Q20 215 30 185"/><path d="M40 260 Q80 215 88 185"/><path d="M100 260 Q140 215 146 185"/><path d="M160 260 Q200 215 204 185"/><path d="M220 260 Q260 215 262 185"/><path d="M280 260 Q320 215 320 185"/><path d="M340 260 Q380 215 378 185"/><path d="M400 260 Q440 215 436 185"/><path d="M460 260 Q500 215 494 185"/><path d="M520 260 Q560 215 552 185"/><path d="M580 260 Q620 215 610 185"/><path d="M640 260 Q680 215 668 185"/><path d="M700 260 Q740 215 726 185"/><path d="M760 260 Q800 215 784 185"/>
+        </g>
+        <path d="M0 232 Q400 212 800 228 V260 H0Z" fill="var(--field-3)"/>
+      </svg>
+      <div class="hero-text"><h1 data-t="welcome"></h1><p data-t="tagline"></p></div>
+    </div>
+    <div class="tiles">
+      <a class="tile main" href="#scan"><svg class="ico"><use href="#i-cam"/></svg><b data-t="scanCrop"></b><span data-t="scanCropHint"></span></a>
+      <a class="tile" href="#history"><svg class="ico"><use href="#i-list"/></svg><b data-t="previousReports"></b><span data-t="previousReportsHint"></span></a>
+      <a class="tile" href="#shops"><svg class="ico"><use href="#i-shop"/></svg><b data-t="findShops"></b><span data-t="findShopsHint"></span></a>
+      <a class="tile" href="#tips"><svg class="ico"><use href="#i-sprout"/></svg><b data-t="farmingTips"></b><span data-t="farmingTipsHint"></span></a>
+      <a class="tile" href="#about"><svg class="ico"><use href="#i-info"/></svg><b data-t="aboutModel"></b><span data-t="aboutModelHint"></span></a>
+    </div>
+    <p class="note" data-t="supportedCrops"></p>
+  </section>
+
+  <!-- SCAN -->
+  <section class="view" data-view="scan" hidden>
+    <h1 data-t="scanCrop"></h1>
+    <p class="note" data-t="supportedCrops"></p>
+    <div class="card" style="display:flex;flex-direction:column;gap:12px">
+      <div id="drop" class="drop"><svg width="44" height="44" style="color:var(--leaf)"><use href="#i-leaf"/></svg><p data-t="photoTips"></p></div>
+      <img id="preview" class="preview" alt="" hidden>
+      <input id="cam-input" type="file" accept="image/*" capture="environment" hidden>
+      <input id="file-input" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+      <div class="row">
+        <button type="button" class="btn secondary" id="btn-cam"><svg width="22" height="22"><use href="#i-cam"/></svg><span data-t="takePhoto"></span></button>
+        <button type="button" class="btn secondary" id="btn-file"><span data-t="uploadPhoto"></span></button>
+      </div>
+      <div id="scan-msg"></div>
+      <div id="scan-progress" class="progress" hidden><span class="spin"></span><span id="scan-progress-text"></span></div>
+      <button type="button" class="btn primary block" id="btn-analyse" hidden data-t="analyse"></button>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section class="view" data-view="result" hidden></section>
+
+  <!-- HISTORY -->
+  <section class="view" data-view="history" hidden>
+    <h1 data-t="previousReports"></h1>
+    <p class="small muted" data-t="historyLocal"></p>
+    <ul class="hist" id="hist"></ul>
+  </section>
+
+  <!-- SHOPS -->
+  <section class="view" data-view="shops" hidden>
+    <h1 data-t="findShops"></h1>
+    <form class="card" id="shop-form" style="display:flex;flex-direction:column;gap:12px">
+      <label class="fld" for="village"><span data-t="villageLabel"></span><input type="text" id="village" autocomplete="address-level2"></label>
+      <div class="row" id="shop-links">
+        <a class="btn primary" id="shop-google" target="_blank" rel="noreferrer" data-t="openGoogle"></a>
+        <a class="btn secondary" id="shop-osm" target="_blank" rel="noreferrer" data-t="openOsm"></a>
+        <a class="btn secondary" id="shop-ta" target="_blank" rel="noreferrer" data-t="openTamil"></a>
+      </div>
+      <p id="shop-empty" class="small muted" data-t="typeVillageFirst"></p>
+    </form>
+    <div class="alert a-warn" data-t="stockUnconfirmed"></div>
+    <p class="small muted" data-t="shopsHow"></p>
+  </section>
+
+  <!-- TIPS -->
+  <section class="view" data-view="tips" hidden>
+    <h1 data-t="farmingTips"></h1>
+    <p data-t="tipsIntro"></p>
+    <div><button type="button" class="speak" id="tips-speak" data-t="listen"></button></div>
+    <ol class="tips" id="tips"></ol>
+    <div class="alert a-ok" data-t="expertNote"></div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="view" data-view="about" hidden>
+    <h1 data-t="aboutModel"></h1>
+    <div class="card" id="about-body"><p class="muted" data-t="loadingModelInfo"></p></div>
+  </section>
+</main>
+
+<nav class="nav" aria-label="Main">
+  <a href="#home" data-nav="home"><svg><use href="#i-home"/></svg><span data-t="home"></span></a>
+  <a href="#scan" data-nav="scan"><svg><use href="#i-cam"/></svg><span data-t="scan"></span></a>
+  <a href="#history" data-nav="history"><svg><use href="#i-list"/></svg><span data-t="reports"></span></a>
+  <a href="#shops" data-nav="shops"><svg><use href="#i-shop"/></svg><span data-t="shops"></span></a>
+  <a href="#tips" data-nav="tips"><svg><use href="#i-sprout"/></svg><span data-t="tips"></span></a>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+<script>
+"use strict";
+/* ---------------- translations ---------------- */
+const T = {
+  en: {
+    appName: "AI Crop Doctor", welcome: "Vanakkam!", tagline: "Photo of a sick leaf → possible disease → what to do → nearby shops",
+    scanCrop: "Scan your crop", scanCropHint: "Take or upload a photo of one leaf",
+    previousReports: "Previous reports", previousReportsHint: "Your past scans on this phone",
+    findShops: "Find agri shops", findShopsHint: "Seed, fertiliser, pesticide shops",
+    farmingTips: "Farming tips", farmingTipsHint: "Simple ways to prevent disease",
+    aboutModel: "About the AI", aboutModelHint: "How it works and how accurate it is",
+    home: "Home", scan: "Scan", reports: "Reports", shops: "Shops", tips: "Tips",
+    supportedCrops: "This version checks tomato and potato leaves only. Rice and other crops are not supported yet.",
+    photoTips: "For a good result: one leaf filling the photo, in daylight, in focus, plain background if possible.",
+    takePhoto: "Take photo", uploadPhoto: "Upload photo", changePhoto: "Choose another photo",
+    analyse: "Check this leaf", loadingModel: "Loading the AI model (about 8 MB, first time only)…", analysing: "Checking the leaf…",
+    modelLoadFailed: "The AI model could not be loaded. Check your internet connection and try again.",
+    result: "Result", confidence: "Model confidence",
+    notGuaranteed: "This is an AI estimate, not a guaranteed diagnosis. Please confirm with an agriculture officer before spending money on treatment.",
+    status_ok: "Possible diagnosis found", status_uncertain: "The model is not sure", status_unsupported: "Image not recognised",
+    status_uncertain_body: "The model could not decide with enough confidence. Please take a clearer photo of one affected leaf in daylight. The closest matches below are hints only, not a diagnosis.",
+    status_unsupported_body: "This photo does not look like a tomato or potato leaf the model was trained on. It may be a different crop, a different part of the plant, or the background may be confusing. Please try another photo of a single tomato or potato leaf.",
+    closestMatches: "Closest matches (hints only)",
+    severity: "How serious is this disease", severity_high: "High", severity_moderate: "Moderate", severity_low: "Low", severity_none: "None",
+    severityNote: "This is the general seriousness of the disease from the sources. The app does not measure how badly your plant is affected.",
+    symptoms: "Symptoms", causes: "Causes and spread", doNow: "What to do now", prevention: "Prevention", natural: "Non-chemical options", sources: "Sources",
+    chemicalNote: "Chemical sprays and doses are not given in this app. Doses depend on the crop, product and local rules. Ask your agriculture officer or Krishi Vigyan Kendra before using any pesticide, and always follow the label and safety instructions.",
+    expertNote: "Need help? Contact your local Agriculture Officer, Krishi Vigyan Kendra (KVK), or the Kisan Call Centre: 1800-180-1551 (toll-free).",
+    limitedSource: "Limited source: detailed guidance for this disease could not be verified. Please confirm with an expert.",
+    listen: "🔊 Listen", stop: "■ Stop", speechUnavailable: "Voice reading is not available for this language on this phone.",
+    findShopsForThis: "Find shops near me", scanAgain: "Scan another leaf",
+    historyLocal: "Saved only on this phone. Clearing browser data removes it.", noReports: "No reports yet. Scan your first leaf.", deleteReport: "Delete", confirmDelete: "Tap again to delete",
+    villageLabel: "Your village or town", openGoogle: "Search Google Maps", openOsm: "Search OpenStreetMap", openTamil: "Search in Tamil (உரக்கடை)",
+    typeVillageFirst: "Type your village or town to open a real map search near you.",
+    stockUnconfirmed: "A shop on the map may not have the product you need. Please call the shop before travelling.",
+    shopsHow: "These buttons open the map app with a search for agricultural, fertiliser and seed shops near your village. The shop names, phone numbers and directions come from the map service, not from this app. The laptop version of AI Crop Doctor shows a shop list and map inside the app.",
+    tipsIntro: "Simple practices recommended by university agriculture extension services to prevent tomato and potato diseases.",
+    loadingModelInfo: "Loading…",
+    aboutLead: "The AI is a MobileNetV2 image model, trained on real photos from the PlantVillage dataset. It runs entirely on your phone: your photo is not uploaded anywhere.",
+    statAcc: "correct on held-out test photos", statOk: "correct when the app gives a firm answer", statClasses: "diseases and healthy classes", statOod: "non-plant test photos rejected",
+    aboutRules: "Safety rules: if the photo looks unlike the tomato and potato leaves it learned from, the app says “Image not recognised”. If the AI is less than 70% sure, it says “The model is not sure” and asks for a clearer photo.",
+    aboutLimits: "Limits: trained on clear photos of single leaves. Field photos with soil, many leaves or shadows can give wrong results. Leaves of other crops (for example grape or pepper) are sometimes wrongly identified as tomato or potato diseases.",
+    classesLabel: "It can recognise",
+    err: { not_an_image: "This file is not a photo.", unsupported_format: "Please use a JPG, PNG or WEBP photo.", file_too_large: "The photo is too large (max 10 MB).",
+      too_small: "The photo is too small. Please take a closer photo.", too_dark: "The photo is too dark. Please take it in daylight.",
+      too_bright: "The photo is too bright. Please avoid direct glare.", too_blurry: "The photo is blurry. Hold the phone steady and tap to focus on the leaf.",
+      generic: "Something went wrong. Please try again." },
+    photoProblem: "Photo could not be used",
+  },
+  ta: {
+    appName: "AI பயிர் மருத்துவர்", welcome: "வணக்கம்!", tagline: "நோயுற்ற இலையின் புகைப்படம் → சாத்தியமான நோய் → என்ன செய்வது → அருகிலுள்ள கடைகள்",
+    scanCrop: "பயிரை சோதிக்கவும்", scanCropHint: "ஒரு இலையின் புகைப்படம் எடுக்கவும் அல்லது பதிவேற்றவும்",
+    previousReports: "முந்தைய அறிக்கைகள்", previousReportsHint: "இந்தக் கைபேசியில் உங்கள் பழைய சோதனைகள்",
+    findShops: "வேளாண் கடைகள்", findShopsHint: "விதை, உரம், பூச்சிக்கொல்லி கடைகள்",
+    farmingTips: "விவசாயக் குறிப்புகள்", farmingTipsHint: "நோய் தடுக்க எளிய வழிகள்",
+    aboutModel: "AI பற்றி", aboutModelHint: "இது எப்படி வேலை செய்கிறது, எவ்வளவு துல்லியம்",
+    home: "முகப்பு", scan: "சோதனை", reports: "அறிக்கைகள்", shops: "கடைகள்", tips: "குறிப்புகள்",
+    supportedCrops: "இந்தப் பதிப்பு தக்காளி, உருளைக்கிழங்கு இலைகளை மட்டுமே சோதிக்கும். நெல் மற்றும் பிற பயிர்கள் இன்னும் ஆதரிக்கப்படவில்லை.",
+    photoTips: "நல்ல முடிவுக்கு: ஒரே இலை, புகைப்படம் முழுவதும், பகல் வெளிச்சத்தில், தெளிவாக, முடிந்தால் வெற்றுப் பின்னணியில்.",
+    takePhoto: "புகைப்படம் எடு", uploadPhoto: "புகைப்படம் பதிவேற்று", changePhoto: "வேறு புகைப்படம்",
+    analyse: "இந்த இலையைச் சோதி", loadingModel: "AI மாடல் ஏற்றப்படுகிறது (சுமார் 8 MB, முதல் முறை மட்டும்)…", analysing: "இலை சோதிக்கப்படுகிறது…",
+    modelLoadFailed: "AI மாடலை ஏற்ற முடியவில்லை. இணைய இணைப்பைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.",
+    result: "முடிவு", confidence: "மாடல் நம்பகத்தன்மை",
+    notGuaranteed: "இது AI மதிப்பீடு மட்டுமே, உறுதியான நோயறிதல் அல்ல. சிகிச்சைக்குப் பணம் செலவழிக்கும் முன் வேளாண் அலுவலரிடம் உறுதி செய்யவும்.",
+    status_ok: "சாத்தியமான நோயறிதல் கிடைத்தது", status_uncertain: "மாடலுக்கு உறுதியாகத் தெரியவில்லை", status_unsupported: "புகைப்படம் அடையாளம் காணப்படவில்லை",
+    status_uncertain_body: "போதுமான நம்பகத்தன்மையுடன் மாடலால் முடிவு செய்ய முடியவில்லை. பாதிக்கப்பட்ட ஒரு இலையைப் பகல் வெளிச்சத்தில் தெளிவாகப் புகைப்படம் எடுக்கவும். கீழே உள்ள நெருங்கிய பொருத்தங்கள் குறிப்புகள் மட்டுமே — நோயறிதல் அல்ல.",
+    status_unsupported_body: "இந்தப் புகைப்படம் மாடல் பயிற்சி பெற்ற தக்காளி அல்லது உருளைக்கிழங்கு இலை போலத் தெரியவில்லை. வேறு பயிராகவோ, செடியின் வேறு பகுதியாகவோ இருக்கலாம், அல்லது பின்னணி குழப்பலாம். ஒரே தக்காளி அல்லது உருளை இலையின் வேறு புகைப்படத்தை முயற்சிக்கவும்.",
+    closestMatches: "நெருங்கிய பொருத்தங்கள் (குறிப்பு மட்டும்)",
+    severity: "இந்த நோய் எவ்வளவு தீவிரமானது", severity_high: "அதிகம்", severity_moderate: "மிதமானது", severity_low: "குறைவு", severity_none: "இல்லை",
+    severityNote: "இது ஆதாரங்களின்படி நோயின் பொதுவான தீவிரம். உங்கள் செடி எவ்வளவு பாதிக்கப்பட்டுள்ளது என்பதைச் செயலி அளவிடவில்லை.",
+    symptoms: "அறிகுறிகள்", causes: "காரணங்கள் & பரவல்", doNow: "இப்போது என்ன செய்வது", prevention: "தடுப்பு முறைகள்", natural: "இரசாயனமற்ற வழிகள்", sources: "ஆதாரங்கள்",
+    chemicalNote: "இரசாயனத் தெளிப்புகளும் அளவுகளும் இந்தச் செயலியில் தரப்படவில்லை. அளவு பயிர், பொருள், உள்ளூர் விதிகளைப் பொறுத்தது. எந்தப் பூச்சிக்கொல்லியையும் பயன்படுத்தும் முன் வேளாண் அலுவலர் அல்லது வேளாண் அறிவியல் நிலையத்தைக் கேளுங்கள்; லேபிள், பாதுகாப்பு வழிமுறைகளை எப்போதும் பின்பற்றுங்கள்.",
+    expertNote: "உதவி தேவையா? உள்ளூர் வேளாண் அலுவலர், வேளாண் அறிவியல் நிலையம் (KVK), அல்லது கிசான் அழைப்பு மையம்: 1800-180-1551 (கட்டணமில்லா எண்) தொடர்பு கொள்ளவும்.",
+    limitedSource: "வரையறுக்கப்பட்ட ஆதாரம்: இந்நோய்க்கான விரிவான வழிகாட்டலைச் சரிபார்க்க முடியவில்லை. நிபுணரிடம் உறுதி செய்யவும்.",
+    listen: "🔊 கேளுங்கள்", stop: "■ நிறுத்து", speechUnavailable: "இந்தக் கைபேசியில் இந்த மொழிக்குக் குரல் வாசிப்பு கிடைக்கவில்லை.",
+    findShopsForThis: "அருகிலுள்ள கடைகளைத் தேடு", scanAgain: "வேறு இலையைச் சோதி",
+    historyLocal: "இந்தக் கைபேசியில் மட்டுமே சேமிக்கப்படும். உலாவித் தரவை அழித்தால் நீங்கும்.", noReports: "இன்னும் அறிக்கைகள் இல்லை. உங்கள் முதல் இலையைச் சோதியுங்கள்.", deleteReport: "நீக்கு", confirmDelete: "நீக்க மீண்டும் தொடவும்",
+    villageLabel: "உங்கள் கிராமம் அல்லது ஊர்", openGoogle: "Google Maps-இல் தேடு", openOsm: "OpenStreetMap-இல் தேடு", openTamil: "தமிழில் தேடு (உரக்கடை)",
+    typeVillageFirst: "உங்கள் அருகில் உண்மையான வரைபடத் தேடலைத் திறக்க கிராமம் அல்லது ஊர் பெயரை உள்ளிடவும்.",
+    stockUnconfirmed: "வரைபடத்தில் உள்ள கடையில் உங்களுக்குத் தேவையான பொருள் இல்லாமல் இருக்கலாம். பயணிக்கும் முன் கடைக்கு அழைத்துக் கேளுங்கள்.",
+    shopsHow: "இந்தப் பொத்தான்கள் உங்கள் கிராமத்தருகே வேளாண், உர, விதைக் கடைகளுக்கான தேடலுடன் வரைபடச் செயலியைத் திறக்கும். கடைப் பெயர்கள், தொலைபேசி எண்கள், வழிகள் வரைபடச் சேவையிலிருந்து வருகின்றன, இந்தச் செயலியிலிருந்து அல்ல. மடிக்கணினிப் பதிப்பில் கடைப் பட்டியலும் வரைபடமும் செயலிக்குள்ளேயே காட்டப்படும்.",
+    tipsIntro: "தக்காளி, உருளைக்கிழங்கு நோய்களைத் தடுக்கப் பல்கலைக்கழக வேளாண் விரிவாக்கச் சேவைகள் பரிந்துரைக்கும் எளிய வழிமுறைகள்.",
+    loadingModelInfo: "ஏற்றப்படுகிறது…",
+    aboutLead: "இந்த AI ஒரு MobileNetV2 பட மாடல்; PlantVillage தரவுத்தொகுப்பின் உண்மையான புகைப்படங்களில் பயிற்சி பெற்றது. இது முழுவதும் உங்கள் கைபேசியிலேயே இயங்கும்: உங்கள் புகைப்படம் எங்கும் பதிவேற்றப்படுவதில்லை.",
+    statAcc: "தனியாக வைக்கப்பட்ட சோதனைப் படங்களில் சரி", statOk: "உறுதியான பதில் தரும்போது சரி", statClasses: "நோய் மற்றும் ஆரோக்கிய வகைகள்", statOod: "தாவரமல்லாத சோதனைப் படங்கள் நிராகரிப்பு",
+    aboutRules: "பாதுகாப்பு விதிகள்: புகைப்படம் பயிற்சி பெற்ற தக்காளி, உருளை இலைகள் போலத் தெரியாவிட்டால் “புகைப்படம் அடையாளம் காணப்படவில்லை” எனக் காட்டும். AI 70% க்குக் குறைவாக உறுதியாக இருந்தால் “மாடலுக்கு உறுதியாகத் தெரியவில்லை” எனக் கூறி தெளிவான புகைப்படம் கேட்கும்.",
+    aboutLimits: "வரம்புகள்: தனி இலைகளின் தெளிவான புகைப்படங்களில் பயிற்சி பெற்றது. மண், பல இலைகள், நிழல் உள்ள வயல் புகைப்படங்களில் தவறான முடிவு வரலாம். பிற பயிர்களின் இலைகள் (எ.கா. திராட்சை, குடைமிளகாய்) சில நேரங்களில் தக்காளி அல்லது உருளை நோயாகத் தவறாகக் காட்டப்படலாம்.",
+    classesLabel: "அடையாளம் காணக்கூடியவை",
+    err: { not_an_image: "இது புகைப்படம் அல்ல.", unsupported_format: "JPG, PNG அல்லது WEBP புகைப்படத்தைப் பயன்படுத்தவும்.", file_too_large: "புகைப்படம் மிகப் பெரியது (அதிகபட்சம் 10 MB).",
+      too_small: "புகைப்படம் மிகச் சிறியது. அருகில் சென்று எடுக்கவும்.", too_dark: "புகைப்படம் மிக இருட்டாக உள்ளது. பகல் வெளிச்சத்தில் எடுக்கவும்.",
+      too_bright: "புகைப்படம் மிக வெளிச்சமாக உள்ளது. நேரடி ஒளியைத் தவிர்க்கவும்.", too_blurry: "புகைப்படம் மங்கலாக உள்ளது. கைபேசியை அசையாமல் பிடித்து இலையில் கவனம் செலுத்தவும்.",
+      generic: "ஏதோ தவறு ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்." },
+    photoProblem: "புகைப்படத்தைப் பயன்படுத்த முடியவில்லை",
+  },
+};
+const TIPS = {
+  en: [["Rotate crops: do not grow tomato, potato, chilli or brinjal in the same place for 2–4 years.", "UMN Extension"],
+    ["Water at the base of the plant (drip or careful hand watering), in the morning, so leaves stay dry.", "UMN Extension"],
+    ["Give enough space between plants and stake them so air can flow and leaves dry quickly.", "UMN Extension"],
+    ["Mulch the soil under plants with straw or dried leaves so soil does not splash onto leaves.", "UMN Extension"],
+    ["Buy seed from a reliable supplier and check seedlings for spots before planting.", "UMN Extension / UC IPM"],
+    ["Remove nightshade weeds and volunteer tomato and potato plants — they carry diseases.", "UC IPM"],
+    ["Wash hands and clean tools after touching sick plants.", "UMN Extension / UC IPM"],
+    ["In hot, dry weather, check the underside of leaves every 3–5 days for spider mites.", "UMN Extension"]],
+  ta: [["பயிர் சுழற்சி: 2–4 ஆண்டுகள் அதே இடத்தில் தக்காளி, உருளை, மிளகாய், கத்தரி பயிரிட வேண்டாம்.", "UMN Extension"],
+    ["இலைகள் உலர்வாக இருக்கக் காலையில் செடியின் அடியில் (சொட்டு நீர் அல்லது கவனமாகக் கையால்) நீர் பாய்ச்சவும்.", "UMN Extension"],
+    ["காற்றோட்டத்திற்கும் இலைகள் விரைவில் உலரவும் செடிகளுக்கு இடைவெளி விட்டுக் குச்சி கட்டவும்.", "UMN Extension"],
+    ["மண் இலைகளில் தெறிக்காமல் இருக்க வைக்கோல் அல்லது காய்ந்த இலைகளால் மூடாக்கு இடவும்.", "UMN Extension"],
+    ["நம்பகமான விற்பனையாளரிடம் விதை வாங்கி, நடும் முன் நாற்றுகளில் புள்ளிகள் உள்ளதா எனப் பார்க்கவும்.", "UMN Extension / UC IPM"],
+    ["மணத்தக்காளிக் களைகளையும் தானாக முளைத்த தக்காளி, உருளைச் செடிகளையும் அகற்றவும் — அவை நோய்களைத் தாங்கும்.", "UC IPM"],
+    ["நோயுற்ற செடிகளைத் தொட்ட பின் கைகளைக் கழுவி, கருவிகளைச் சுத்தம் செய்யவும்.", "UMN Extension / UC IPM"],
+    ["வெப்பமான, வறண்ட காலத்தில் 3–5 நாட்களுக்கு ஒருமுறை இலைகளின் அடிப்பக்கத்தில் சிலந்திப் பேன் உள்ளதா எனப் பார்க்கவும்.", "UMN Extension"]],
+};
+const SPEECH = { en: "en-IN", ta: "ta-IN" };
+const UNSUPPORTED = "Unsupported___other";
+
+/* ---------------- tiny helpers ---------------- */
+const $ = (s, r = document) => r.querySelector(s);
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } },
+};
+let lang = store.get("cd.lang", "en"); if (!T[lang]) lang = "en";
+const t = (k) => (T[lang][k] ?? T.en[k] ?? k);
+const tErr = (c) => (T[lang].err[c] ?? T.en.err[c] ?? T.en.err.generic);
+function el(tag, attrs = {}, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") e.className = v; else if (k === "text") e.textContent = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else if (v !== false && v != null) e.setAttribute(k, v);
+  }
+  for (const c of kids.flat()) if (c != null) e.append(c);
+  return e;
+}
+function applyText() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-t]").forEach((n) => { n.textContent = t(n.dataset.t); });
+  $("#lang-en").setAttribute("aria-pressed", lang === "en"); $("#lang-ta").setAttribute("aria-pressed", lang === "ta");
+  renderTips(); updateShopLinks(); renderHistory();
+  if (current === "result" && lastResult) renderResult(lastResult);
+  if (current === "about") renderAbout();
+}
+
+/* ---------------- speech (browser voices) ---------------- */
+let speakingBtn = null;
+function speak(text, btn) {
+  const synth = window.speechSynthesis;
+  if (speakingBtn === btn && synth?.speaking) { synth.cancel(); btn.textContent = t("listen"); speakingBtn = null; return; }
+  const voices = synth ? synth.getVoices() : [];
+  const want = SPEECH[lang], pre = want.split("-")[0];
+  const v = voices.find((x) => x.lang === want) || voices.find((x) => (x.lang || "").toLowerCase().startsWith(pre));
+  if (!synth || !v) { const m = el("small", { class: "muted", text: " " + t("speechUnavailable") }); btn.after(m); setTimeout(() => m.remove(), 5000); return; }
+  synth.cancel();
+  const u = new SpeechSynthesisUtterance(text); u.voice = v; u.lang = v.lang; u.rate = 0.9;
+  u.onend = u.onerror = () => { btn.textContent = t("listen"); if (speakingBtn === btn) speakingBtn = null; };
+  if (speakingBtn) speakingBtn.textContent = t("listen");
+  speakingBtn = btn; btn.textContent = t("stop"); synth.speak(u);
+}
+window.speechSynthesis?.getVoices();
+
+/* ---------------- routing ---------------- */
+const VIEWS = ["home", "scan", "result", "history", "shops", "tips", "about"];
+let current = "home";
+function route() {
+  let v = (location.hash || "#home").slice(1);
+  if (!VIEWS.includes(v) || (v === "result" && !lastResult)) v = "home";
+  current = v;
+  document.querySelectorAll("[data-view]").forEach((s) => { s.hidden = s.dataset.view !== v; });
+  document.querySelectorAll("[data-nav]").forEach((a) => (a.dataset.nav === v ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current")));
+  if (v === "about") renderAbout();
+  if (v === "history") renderHistory();
+  window.speechSynthesis?.cancel(); speakingBtn = null;
+  window.scrollTo(0, 0);
+}
+addEventListener("hashchange", route);
+
+/* ---------------- data + model loading ---------------- */
+let KB = null, META = null, MODEL = null, MEANS = null, PREC = null, loading = null;
+const kbReady = fetch("knowledge.json").then((r) => r.json()).then((j) => { KB = j; });
+const metaReady = fetch("meta.json").then((r) => r.json()).then((j) => { META = j; });
+function f16(h) {
+  const s = (h & 0x8000) ? -1 : 1, e = (h >> 10) & 0x1f, f = h & 0x3ff;
+  if (e === 0) return s * Math.pow(2, -14) * (f / 1024);
+  if (e === 31) return f ? NaN : s * Infinity;
+  return s * Math.pow(2, e - 15) * (1 + f / 1024);
+}
+function loadModel() {
+  if (loading) return loading;
+  loading = (async () => {
+    await metaReady;
+    const [model, buf] = await Promise.all([tf.loadGraphModel("model.json"), fetch("ood.wasm").then((r) => { if (!r.ok) throw new Error("ood"); return r.arrayBuffer(); })]);
+    const D = META.emb_dim, K = META.n_means;
+    MEANS = new Float32Array(buf, 0, K * D);
+    const h = new Uint16Array(buf, K * D * 4, D * D);
+    PREC = new Float32Array(D * D); for (let i = 0; i < h.length; i++) PREC[i] = f16(h[i]);
+    tf.tidy(() => { const o = model.execute(tf.zeros([1, 224, 224, 3])); });
+    MODEL = model;
+  })();
+  loading.catch(() => { loading = null; });
+  return loading;
+}
+
+/* ---------------- image checks (same thresholds as the server) ---------------- */
+function qualityCheck(img) {
+  const w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+  if (Math.min(w, h) < 96) return "too_small";
+  const sc = Math.min(1, 512 / Math.max(w, h)), cw = Math.max(1, Math.round(w * sc)), ch = Math.max(1, Math.round(h * sc));
+  const c = el("canvas", { width: cw, height: ch }), g = c.getContext("2d", { willReadFrequently: true });
+  g.drawImage(img, 0, 0, cw, ch);
+  const d = g.getImageData(0, 0, cw, ch).data, grey = new Float32Array(cw * ch);
+  let sum = 0;
+  for (let i = 0, j = 0; i < d.length; i += 4, j++) { const v = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]; grey[j] = v; sum += v; }
+  const mean = sum / grey.length;
+  if (mean < 25) return "too_dark";
+  if (mean > 240) return "too_bright";
+  let n = 0, s1 = 0, s2 = 0;
+  for (let y = 1; y < ch - 1; y++) for (let x = 1; x < cw - 1; x++) {
+    const i = y * cw + x, L = grey[i - cw] + grey[i + cw] + grey[i - 1] + grey[i + 1] - 4 * grey[i];
+    s1 += L; s2 += L * L; n++;
+  }
+  const varL = n ? s2 / n - (s1 / n) ** 2 : 0;
+  if (varL < 15) return "too_blurry";
+  return null;
+}
+
+/* ---------------- prediction (same decision rule as the server) ---------------- */
+async function predict(img) {
+  const c = el("canvas", { width: 224, height: 224 }), g = c.getContext("2d");
+  g.imageSmoothingQuality = "high"; g.drawImage(img, 0, 0, 224, 224);
+  const outs = tf.tidy(() => {
+    const x = tf.browser.fromPixels(c).toFloat().expandDims(0);
+    let o = MODEL.execute(x);
+    if (!Array.isArray(o)) o = [o.output_0 ?? o["Identity:0"], o.output_1 ?? o["Identity_1:0"]];
+    return o.map((z) => z.dataSync().slice());
+  });
+  let emb = outs[0], probs = outs[1];
+  if (emb.length !== META.emb_dim) { [emb, probs] = [probs, emb]; }
+  const D = META.emb_dim, K = META.n_means, diff = new Float64Array(D);
+  let best = Infinity;
+  for (let k = 0; k < K; k++) {
+    for (let i = 0; i < D; i++) diff[i] = emb[i] - MEANS[k * D + i];
+    let d2 = 0;
+    for (let i = 0; i < D; i++) { let row = 0; const off = i * D; for (let j = 0; j < D; j++) row += PREC[off + j] * diff[j]; d2 += diff[i] * row; }
+    if (d2 < best) best = d2;
+  }
+  const dist = Math.sqrt(Math.max(best, 0));
+  const order = [...probs.keys()].sort((a, b) => probs[b] - probs[a]);
+  const top = META.labels[order[0]];
+  const topK = order.filter((i) => META.labels[i] !== UNSUPPORTED).slice(0, 3).map((i) => ({ class_id: META.labels[i], confidence: probs[i] }));
+  let status = "ok";
+  if (top === UNSUPPORTED || dist > META.threshold) status = "unsupported";
+  else if (topK[0].confidence < META.min_confidence) status = "uncertain";
+  return { status, class_id: status === "ok" ? topK[0].class_id : null, confidence: topK[0].confidence, top_k: topK, ood_distance: dist };
+}
+window.__cropDoctorPredict = async (url) => { await loadModel(); const img = new Image(); img.src = url; await img.decode(); return predict(img); };
+
+/* ---------------- scan view ---------------- */
+let chosen = null, chosenURL = "", lastResult = null;
+$("#btn-cam").addEventListener("click", () => $("#cam-input").click());
+$("#btn-file").addEventListener("click", () => $("#file-input").click());
+for (const id of ["#cam-input", "#file-input"]) $(id).addEventListener("change", onPick);
+function scanMsg(code) { const box = $("#scan-msg"); box.replaceChildren(); if (code) box.append(el("div", { class: "alert a-err" }, el("b", { text: t("photoProblem") }), document.createTextNode(code === "modelLoadFailed" ? t("modelLoadFailed") : tErr(code)))); }
+function onPick(e) {
+  const f = e.target.files?.[0]; e.target.value = ""; if (!f) return;
+  scanMsg(null);
+  if (f.type && !/^image\/(jpeg|png|webp)$/.test(f.type)) { scanMsg("unsupported_format"); return; }
+  if (f.size > 10 * 1024 * 1024) { scanMsg("file_too_large"); return; }
+  if (chosenURL) URL.revokeObjectURL(chosenURL);
+  chosen = f; chosenURL = URL.createObjectURL(f);
+  $("#preview").src = chosenURL; $("#preview").hidden = false; $("#drop").hidden = true;
+  $("#btn-file").querySelector("span").textContent = t("changePhoto");
+  $("#btn-analyse").hidden = false;
+  loadModel().catch(() => {});
+}
+$("#btn-analyse").addEventListener("click", async () => {
+  if (!chosen) return;
+  const btn = $("#btn-analyse"), prog = $("#scan-progress");
+  btn.hidden = true; prog.hidden = false; scanMsg(null);
+  try {
+    const img = new Image(); img.src = chosenURL;
+    try { await img.decode(); } catch { throw Object.assign(new Error(), { code: "not_an_image" }); }
+    const q = qualityCheck(img); if (q) throw Object.assign(new Error(), { code: q });
+    $("#scan-progress-text").textContent = MODEL ? t("analysing") : t("loadingModel");
+    try { await Promise.all([loadModel(), kbReady]); } catch { throw Object.assign(new Error(), { code: "modelLoadFailed" }); }
+    $("#scan-progress-text").textContent = t("analysing");
+    await new Promise((r) => setTimeout(r, 30));
+    const r = await predict(img);
+    r.thumb = thumb(img); r.ts = Date.now(); r.id = r.ts;
+    saveHistory(r); lastResult = r;
+    location.hash = "#result"; renderResult(r);
+  } catch (err) { scanMsg(err.code || "generic"); btn.hidden = false; }
+  finally { prog.hidden = true; }
+});
+function thumb(img) {
+  const s = 120, c = el("canvas", { width: s, height: s }), g = c.getContext("2d");
+  const w = img.naturalWidth, h = img.naturalHeight, m = Math.min(w, h);
+  g.drawImage(img, (w - m) / 2, (h - m) / 2, m, m, 0, 0, s, s);
+  return c.toDataURL("image/jpeg", 0.7);
+}
+
+/* ---------------- result view ---------------- */
+function disease(id) {
+  const e = KB?.diseases[id]; if (!e) return null;
+  const txt = e[lang] || e.en;
+  return { ...e, ...txt, sources: e.sources.map((s) => KB.sources[s]) };
+}
+const pct = (v) => Math.min(99, Math.round(v * 100));
+function confBar(v) {
+  const level = v >= 0.9 ? "" : v >= 0.7 ? " mid" : " low";
+  return el("div", { class: "conf" }, el("div", { class: "track" }, el("div", { class: "fill" + level, style: `width:${pct(v)}%` })), el("b", { text: pct(v) + "%" }));
+}
+function section(title, items, speakable) {
+  if (!items || !items.length) return null;
+  const h = el("h3", {}, el("span", { text: title }));
+  if (speakable) { const b = el("button", { type: "button", class: "speak", text: t("listen") }); b.addEventListener("click", () => speak(title + ". " + items.join(". "), b)); h.append(b); }
+  return el("div", { class: "sec" }, h, el("ul", {}, items.map((x) => el("li", { text: x }))));
+}
+function renderResult(r) {
+  const v = $('[data-view="result"]'); v.replaceChildren();
+  const d = r.status === "ok" ? disease(r.class_id) : null;
+  v.append(el("h1", { text: t("result") }));
+  const info = el("div", {});
+  info.append(el("span", { class: "pill " + (r.status === "ok" ? "p-ok" : "p-warn"), id: "status", text: t("status_" + r.status) }));
+  if (d) {
+    info.append(el("div", { class: "muted", text: d.crop_name }), el("h2", { class: "dname", text: (d.healthy ? "✓ " : "") + d.name }));
+    if (d.pathogen) info.append(el("div", { class: "small muted", text: d.pathogen }));
+    info.append(el("div", { class: "small", style: "margin-top:8px;font-weight:600", text: t("confidence") }), confBar(r.confidence));
+    const b = el("button", { type: "button", class: "speak", text: t("listen") });
+    b.addEventListener("click", () => speak(`${d.crop_name}. ${d.name}. ${t("confidence")} ${pct(r.confidence)}%. ${d.severity_note}`, b));
+    info.append(b);
+  } else info.append(el("p", { text: t("status_" + r.status + "_body") }));
+  info.append(el("div", { class: "small muted", style: "margin-top:6px", text: new Date(r.ts).toLocaleString(lang === "ta" ? "ta-IN" : "en-IN") }));
+  v.append(el("div", { class: "card res-top" }, el("img", { src: r.thumb, alt: "" }), info));
+  v.append(el("div", { class: "alert a-warn", text: t("notGuaranteed") }));
+  if (r.status === "uncertain") {
+    v.append(el("div", { class: "card" }, el("h3", { text: t("closestMatches") }),
+      el("ul", { class: "cands" }, r.top_k.map((c) => { const x = disease(c.class_id); return el("li", {}, el("div", { text: `${x.crop_name} — ${x.name}` }), confBar(c.confidence)); }))));
+  }
+  if (d) {
+    const card = el("div", { class: "card", style: "display:flex;flex-direction:column;gap:12px" });
+    if (!d.healthy) card.append(el("div", { class: "sev " + d.severity },
+      el("div", {}, el("span", { text: t("severity") + ": " }), el("b", { text: t("severity_" + d.severity) })),
+      el("p", { style: "margin:4px 0", text: d.severity_note }), el("div", { class: "small muted", text: t("severityNote") })));
+    else card.append(el("p", { text: d.severity_note }));
+    if (d.limited_source) card.append(el("div", { class: "alert a-warn", text: t("limitedSource") }));
+    card.append(...[section(t("symptoms"), d.symptoms, true), section(t("causes"), d.causes), section(t("doNow"), d.do_now, true),
+      section(t("prevention"), d.prevention, true), section(t("natural"), d.natural)].filter(Boolean));
+    if (!d.healthy) card.append(el("div", { class: "alert a-warn", text: t("chemicalNote") }));
+    card.append(el("div", { class: "alert a-ok", text: t("expertNote") }));
+    card.append(el("div", { class: "sec" }, el("h3", { text: t("sources") }),
+      el("ul", { class: "src" }, d.sources.map((s) => el("li", {}, el("a", { href: s.url, target: "_blank", rel: "noreferrer", text: s.title }))))));
+    v.append(card);
+    if (!d.healthy) v.append(el("a", { class: "btn primary block", href: "#shops", text: t("findShopsForThis") }));
+  }
+  v.append(el("a", { class: "btn secondary block", href: "#scan", text: t("scanAgain") }));
+}
+
+/* ---------------- history (this phone only) ---------------- */
+function saveHistory(r) {
+  const h = store.get("cd.history", []);
+  h.unshift({ id: r.id, ts: r.ts, status: r.status, class_id: r.class_id, confidence: r.confidence, top_k: r.top_k, thumb: r.thumb });
+  while (h.length > 30 || (!store.set("cd.history", h) && h.length > 1)) h.pop();
+}
+let pendingDelete = null;
+function renderHistory() {
+  const ul = $("#hist"); if (!ul) return; ul.replaceChildren();
+  const h = store.get("cd.history", []);
+  if (!h.length) { ul.append(el("li", { class: "card" }, el("p", { style: "margin:0", text: t("noReports") }))); return; }
+  for (const r of h) {
+    const d = r.status === "ok" ? disease(r.class_id) : null;
+    const label = d ? `${d.crop_name} — ${d.name}` : t("status_" + r.status);
+    const open = el("button", { type: "button", class: "open" }, el("img", { src: r.thumb, alt: "" }),
+      el("div", {}, el("b", { text: label }), el("div", { class: "small muted", text: new Date(r.ts).toLocaleString(lang === "ta" ? "ta-IN" : "en-IN") + (r.status === "ok" ? ` · ${pct(r.confidence)}%` : "") })));
+    open.addEventListener("click", () => { lastResult = r; location.hash = "#result"; renderResult(r); });
+    const del = el("button", { type: "button", class: "btn ghost", text: pendingDelete === r.id ? t("confirmDelete") : t("deleteReport") });
+    del.addEventListener("click", () => {
+      if (pendingDelete !== r.id) { pendingDelete = r.id; renderHistory(); return; }
+      pendingDelete = null; store.set("cd.history", store.get("cd.history", []).filter((x) => x.id !== r.id)); renderHistory();
+    });
+    ul.append(el("li", { class: "card" }, open, del));
+  }
+}
+
+/* ---------------- shops (opens real map searches) ---------------- */
+function updateShopLinks() {
+  const q = ($("#village").value || "").trim();
+  const ok = q.length >= 2;
+  $("#shop-links").hidden = !ok; $("#shop-empty").hidden = ok;
+  const enc = encodeURIComponent;
+  $("#shop-google").href = `https://www.google.com/maps/search/?api=1&query=${enc("fertilizer seeds pesticide shop near " + q)}`;
+  $("#shop-osm").href = `https://www.openstreetmap.org/search?query=${enc("fertilizer shop " + q)}`;
+  $("#shop-ta").href = `https://www.google.com/maps/search/?api=1&query=${enc("உரக்கடை " + q)}`;
+  if (ok) store.set("cd.village", q);
+}
+$("#village").value = store.get("cd.village", "");
+$("#village").addEventListener("input", updateShopLinks);
+$("#shop-form").addEventListener("submit", (e) => { e.preventDefault(); updateShopLinks(); });
+
+/* ---------------- tips + about ---------------- */
+function renderTips() {
+  const ol = $("#tips"); ol.replaceChildren();
+  TIPS[lang].forEach(([txt, src], i) => ol.append(el("li", { class: "card" }, el("span", { class: "n", text: String(i + 1) }), el("div", {}, el("p", { style: "margin:0 0 2px", text: txt }), el("small", { class: "muted", text: src })))));
+}
+$("#tips-speak").addEventListener("click", (e) => speak(TIPS[lang].map((x) => x[0]).join(". "), e.currentTarget));
+async function renderAbout() {
+  const box = $("#about-body");
+  try { await Promise.all([metaReady, kbReady]); } catch { return; }
+  const pc = (x) => (x * 100).toFixed(1) + "%";
+  const classes = META.labels.filter((l) => l !== UNSUPPORTED).map((id) => { const d = disease(id); return `${d.crop_name} — ${d.name}`; });
+  box.replaceChildren(
+    el("p", { text: t("aboutLead") }),
+    el("div", { class: "stats" },
+      el("div", {}, el("b", { text: pc(META.test_accuracy) }), el("span", { class: "small", text: t("statAcc") })),
+      el("div", {}, el("b", { text: pc(META.final_rule.accuracy_when_ok) }), el("span", { class: "small", text: t("statOk") })),
+      el("div", {}, el("b", { text: String(classes.length) }), el("span", { class: "small", text: t("statClasses") })),
+      el("div", {}, el("b", { text: "100%" }), el("span", { class: "small", text: t("statOod") }))),
+    el("p", { style: "margin-top:12px", text: t("aboutRules") }),
+    el("div", { class: "alert a-warn", text: t("aboutLimits") }),
+    el("details", { style: "margin-top:10px" }, el("summary", { text: `${t("classesLabel")} (${classes.length})` }), el("ul", { class: "small" }, classes.map((c) => el("li", { text: c })))),
+    el("p", { class: "small muted", style: "margin-top:10px", text: "PlantVillage dataset: Mohanty, Hughes & Salathé (2016), CC BY-SA 3.0. Source code: github.com/balamurugangethub/ai-crop" }));
+}
+
+/* ---------------- start ---------------- */
+for (const b of document.querySelectorAll("[data-lang]")) b.addEventListener("click", () => { lang = b.dataset.lang; store.set("cd.lang", lang); applyText(); });
+kbReady.then(() => { renderHistory(); if (current === "result" && lastResult) renderResult(lastResult); }).catch(() => {});
+applyText(); route();
+</script>

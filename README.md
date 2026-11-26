@@ -45,7 +45,7 @@ available, so rice was left out rather than faked.
 
 Trained on CPU with `backend/ml/train.py` (full numbers in `backend/model/metrics.json`).
 
-* **Test accuracy on supported classes: 96.6%** (3,041 held-out tomato/potato images).
+* **Test accuracy on supported classes: 96.5%** (3,041 held-out tomato/potato images).
 * With the app's decision rule applied:
   * 96.7% of supported test images get a confident result, and **97.7% of those are correct**.
   * 2.4% are reported as "uncertain"; 0.8% are wrongly reported as "unsupported".
