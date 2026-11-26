@@ -1,0 +1,488 @@
+{
+  "dataset": "PlantVillage (github.com/spMohanty/PlantVillage-Dataset, raw/color; Hughes & Salathe 2015) for tomato/potato classes; 'Unsupported___other' = other PlantVillage crops (excluding grape and pepper), CIFAR-10 training photos, TensorFlow flower photos (daisy, dandelion, roses)",
+  "classes": [
+    "Potato___Early_blight",
+    "Potato___Late_blight",
+    "Potato___healthy",
+    "Tomato___Bacterial_spot",
+    "Tomato___Early_blight",
+    "Tomato___Late_blight",
+    "Tomato___Leaf_Mold",
+    "Tomato___Septoria_leaf_spot",
+    "Tomato___Spider_mites Two-spotted_spider_mite",
+    "Tomato___Target_Spot",
+    "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
+    "Tomato___Tomato_mosaic_virus",
+    "Tomato___healthy",
+    "Unsupported___other"
+  ],
+  "split_sizes": {
+    "train": 18990,
+    "val": 4061,
+    "test": 4061
+  },
+  "train_seconds": 1540.4,
+  "history": {
+    "head": {
+      "accuracy": [
+        0.8854,
+        0.9468,
+        0.9556
+      ],
+      "loss": [
+        0.3374,
+        0.1353,
+        0.1077
+      ],
+      "val_accuracy": [
+        0.9429,
+        0.9448,
+        0.9429
+      ],
+      "val_loss": [
+        0.1735,
+        0.1633,
+        0.1721
+      ]
+    },
+    "finetune": {
+      "accuracy": [
+        0.8904,
+        0.9169,
+        0.9377,
+        0.9377,
+        0.947
+      ],
+      "loss": [
+        0.3322,
+        0.2483,
+        0.1874,
+        0.1908,
+        0.1585
+      ],
+      "val_accuracy": [
+        0.803,
+        0.8791,
+        0.9094,
+        0.9402,
+        0.9702
+      ],
+      "val_loss": [
+        0.5525,
+        0.3467,
+        0.2627,
+        0.1728,
+        0.0847
+      ],
+      "learning_rate": [
+        0.0001,
+        0.0001,
+        0.0001,
+        0.0001,
+        0.0001
+      ]
+    }
+  },
+  "test_accuracy_all_classes": 0.9705,
+  "test_accuracy_supported_classes": 0.9655,
+  "decision_rule": {
+    "min_confidence": 0.7,
+    "ood_threshold": 56.02931563055068,
+    "rule": "unsupported if top class is Unsupported___other or Mahalanobis distance > threshold; else uncertain if confidence < min_confidence; else ok"
+  },
+  "final_rule_on_test_split": {
+    "supported_test_images": 3041,
+    "coverage_ok": 0.9674,
+    "accuracy_when_ok": 0.9769,
+    "uncertain_rate": 0.0243,
+    "wrongly_unsupported_rate": 0.0082,
+    "other_class_test_images": 1020,
+    "other_class_rejected_rate": 0.9892
+  },
+  "per_class": {
+    "Potato___Early_blight": {
+      "precision": 0.9804,
+      "recall": 1.0,
+      "f1": 0.9901,
+      "support": 150
+    },
+    "Potato___Late_blight": {
+      "precision": 0.993,
+      "recall": 0.94,
+      "f1": 0.9658,
+      "support": 150
+    },
+    "Potato___healthy": {
+      "precision": 0.7857,
+      "recall": 1.0,
+      "f1": 0.88,
+      "support": 22
+    },
+    "Tomato___Bacterial_spot": {
+      "precision": 0.9466,
+      "recall": 1.0,
+      "f1": 0.9726,
+      "support": 319
+    },
+    "Tomato___Early_blight": {
+      "precision": 0.9843,
+      "recall": 0.8333,
+      "f1": 0.9025,
+      "support": 150
+    },
+    "Tomato___Late_blight": {
+      "precision": 0.9362,
+      "recall": 0.9755,
+      "f1": 0.9555,
+      "support": 286
+    },
+    "Tomato___Leaf_Mold": {
+      "precision": 0.9784,
+      "recall": 0.9577,
+      "f1": 0.968,
+      "support": 142
+    },
+    "Tomato___Septoria_leaf_spot": {
+      "precision": 0.9416,
+      "recall": 0.9736,
+      "f1": 0.9573,
+      "support": 265
+    },
+    "Tomato___Spider_mites Two-spotted_spider_mite": {
+      "precision": 0.9738,
+      "recall": 0.8884,
+      "f1": 0.9292,
+      "support": 251
+    },
+    "Tomato___Target_Spot": {
+      "precision": 0.8548,
+      "recall": 0.981,
+      "f1": 0.9135,
+      "support": 210
+    },
+    "Tomato___Tomato_Yellow_Leaf_Curl_Virus": {
+      "precision": 1.0,
+      "recall": 0.9776,
+      "f1": 0.9887,
+      "support": 803
+    },
+    "Tomato___Tomato_mosaic_virus": {
+      "precision": 0.9643,
+      "recall": 0.9818,
+      "f1": 0.973,
+      "support": 55
+    },
+    "Tomato___healthy": {
+      "precision": 0.9675,
+      "recall": 1.0,
+      "f1": 0.9835,
+      "support": 238
+    },
+    "Unsupported___other": {
+      "precision": 0.999,
+      "recall": 0.9853,
+      "f1": 0.9921,
+      "support": 1020
+    }
+  },
+  "confusion_matrix": [
+    [
+      150,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      2,
+      141,
+      0,
+      0,
+      0,
+      7,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      22,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      319,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      2,
+      125,
+      11,
+      1,
+      6,
+      0,
+      5,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      279,
+      2,
+      1,
+      0,
+      2,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      136,
+      1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      4,
+      1,
+      0,
+      0,
+      258,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      223,
+      22,
+      0,
+      1,
+      5,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      2,
+      0,
+      206,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      9,
+      0,
+      0,
+      0,
+      0,
+      4,
+      4,
+      785,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      54,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      238,
+      0
+    ],
+    [
+      1,
+      0,
+      6,
+      1,
+      0,
+      1,
+      0,
+      6,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1005
+    ]
+  ],
+  "ood_evaluation_held_out": {
+    "Grape___Black_rot": {
+      "n": 300,
+      "final_rejected_or_uncertain": 0.8067,
+      "final_unsupported": 0.56,
+      "wrong_confident_diagnosis": 0.1933,
+      "by_other_class": 0.51,
+      "by_mahalanobis": 0.3133
+    },
+    "Grape___Esca_(Black_Measles)": {
+      "n": 300,
+      "final_rejected_or_uncertain": 0.8867,
+      "final_unsupported": 0.8167,
+      "wrong_confident_diagnosis": 0.1133,
+      "by_other_class": 0.6533,
+      "by_mahalanobis": 0.64
+    },
+    "Grape___Leaf_blight_(Isariopsis_Leaf_Spot)": {
+      "n": 300,
+      "final_rejected_or_uncertain": 0.6133,
+      "final_unsupported": 0.45,
+      "wrong_confident_diagnosis": 0.3867,
+      "by_other_class": 0.1867,
+      "by_mahalanobis": 0.35
+    },
+    "Grape___healthy": {
+      "n": 300,
+      "final_rejected_or_uncertain": 0.9333,
+      "final_unsupported": 0.8967,
+      "wrong_confident_diagnosis": 0.0667,
+      "by_other_class": 0.83,
+      "by_mahalanobis": 0.7867
+    },
+    "Pepper,_bell___Bacterial_spot": {
+      "n": 300,
+      "final_rejected_or_uncertain": 0.8367,
+      "final_unsupported": 0.6667,
+      "wrong_confident_diagnosis": 0.1633,
+      "by_other_class": 0.64,
+      "by_mahalanobis": 0.13
+    },
+    "Pepper,_bell___healthy": {
+      "n": 300,
+      "final_rejected_or_uncertain": 0.9767,
+      "final_unsupported": 0.9367,
+      "wrong_confident_diagnosis": 0.0233,
+      "by_other_class": 0.9233,
+      "by_mahalanobis": 0.5133
+    },
+    "cifar10_test": {
+      "n": 300,
+      "final_rejected_or_uncertain": 1.0,
+      "final_unsupported": 1.0,
+      "wrong_confident_diagnosis": 0.0,
+      "by_other_class": 1.0,
+      "by_mahalanobis": 0.9967
+    },
+    "flowers_sunflowers": {
+      "n": 300,
+      "final_rejected_or_uncertain": 1.0,
+      "final_unsupported": 1.0,
+      "wrong_confident_diagnosis": 0.0,
+      "by_other_class": 1.0,
+      "by_mahalanobis": 1.0
+    },
+    "flowers_tulips": {
+      "n": 300,
+      "final_rejected_or_uncertain": 1.0,
+      "final_unsupported": 1.0,
+      "wrong_confident_diagnosis": 0.0,
+      "by_other_class": 1.0,
+      "by_mahalanobis": 0.9967
+    }
+  }
+}

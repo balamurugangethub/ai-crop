@@ -39,7 +39,7 @@ export default function HistoryPage() {
                 <strong>{r.status === 'ok' ? `${r.crop_name} — ${r.name}` : t(`status_${r.status}`)}</strong>
                 <div className="small muted">
                   {new Date(r.created_at.replace(' ', 'T') + 'Z').toLocaleString()}
-                  {r.status === 'ok' && ` · ${Math.round(r.confidence * 100)}%`}
+                  {r.status === 'ok' && ` · ${Math.min(99, Math.round(r.confidence * 100))}%`}
                 </div>
               </div>
             </Link>
