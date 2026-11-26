@@ -1,0 +1,17 @@
+{
+  "umn_early_blight": {"title": "Early blight in tomato and potato — University of Minnesota Extension", "url": "https://extension.umn.edu/disease-management/early-blight-tomato-and-potato"},
+  "umn_late_blight": {"title": "Late blight of tomato and potato — University of Minnesota Extension", "url": "https://extension.umn.edu/disease-management/late-blight"},
+  "umn_bacterial_spot": {"title": "Bacterial spot of tomato and pepper — University of Minnesota Extension", "url": "https://extension.umn.edu/disease-management/bacterial-spot-tomato-and-pepper"},
+  "umn_leaf_mold": {"title": "Tomato leaf mold — University of Minnesota Extension", "url": "https://extension.umn.edu/disease-management/tomato-leaf-mold"},
+  "umn_spider_mites": {"title": "Twospotted spider mites in home gardens — University of Minnesota Extension", "url": "https://extension.umn.edu/yard-and-garden-insects/spider-mites"},
+  "umn_growing_tomatoes": {"title": "Growing tomatoes (diseases section) — University of Minnesota Extension", "url": "https://extension.umn.edu/garden-and-home/yard-and-garden/gardening-in-minnesota/growing-tomatoes"},
+  "ucipm_tomato_early_blight": {"title": "Early Blight / Tomato — UC Statewide IPM Program", "url": "https://ipm.ucanr.edu/agriculture/tomato/early-blight/"},
+  "ucipm_tomato_late_blight": {"title": "Late Blight / Tomato — UC Statewide IPM Program", "url": "https://ipm.ucanr.edu/agriculture/tomato/late-blight/"},
+  "ucipm_tomato_bacterial_spot": {"title": "Bacterial Spot / Tomato — UC Statewide IPM Program", "url": "https://ipm.ucanr.edu/agriculture/tomato/bacterial-spot/"},
+  "ucipm_tomato_tylcv": {"title": "Tomato Yellow Leaf Curl / Tomato — UC Statewide IPM Program", "url": "https://ipm.ucanr.edu/agriculture/tomato/tomato-yellow-leaf-curl/"},
+  "ucipm_tomato_tobamo": {"title": "Tobacco Mosaic / Tomato — UC Statewide IPM Program", "url": "https://ipm.ucanr.edu/agriculture/tomato/tobacco-mosaic/"},
+  "ucipm_spider_mites": {"title": "Pest Notes: Spider Mites — UC Statewide IPM Program", "url": "https://ipm.ucanr.edu/home-and-landscape/spider-mites/"},
+  "ucipm_septoria": {"title": "Septoria Leaf Spot (general) — UC Statewide IPM Program", "url": "https://ipm.ucanr.edu/home-and-landscape/septoria-leaf-spot/"},
+  "ucipm_potato_early_blight": {"title": "Early Blight / Potato — UC Statewide IPM Program", "url": "https://ipm.ucanr.edu/agriculture/potato/early-blight/"},
+  "ucipm_potato_late_blight": {"title": "Late Blight / Potato — UC Statewide IPM Program", "url": "https://ipm.ucanr.edu/agriculture/potato/late-blight/"}
+}
